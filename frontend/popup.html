@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YT Comment Analyzer</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+
+    <header class="header">
+      <div class="header-left">
+        <div class="logo-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </div>
+        <div>
+          <h1>Comment Analyzer</h1>
+          <p id="status-text">Open a YouTube video to begin</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Loading State -->
+    <div id="loading" class="hidden">
+      <div class="loading-inner">
+        <div class="spinner"></div>
+        <p class="loading-title">Analyzing comments...</p>
+        <p class="loading-sub">This may take a moment for videos with many comments.</p>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div id="error" class="hidden error-box">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <p id="error-message">Something went wrong.</p>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="hidden">
+
+      <!-- Top Stats Row -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-value" id="total-comments">0</span>
+          <span class="stat-label">Comments</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value dominant" id="dominant-sentiment">—</span>
+          <span class="stat-label">Overall Mood</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="most-active-month">—</span>
+          <span class="stat-label">Peak Month</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-value" id="avg-per-month">0</span>
+          <span class="stat-label">Avg / Month</span>
+        </div>
+      </div>
+
+      <!-- Sentiment Breakdown Bars -->
+      <div class="section-card">
+        <h2 class="section-title">Sentiment Breakdown</h2>
+        <div class="breakdown-row">
+          <div class="breakdown-item">
+            <div class="breakdown-header">
+              <span class="dot positive-dot"></span>
+              <span class="breakdown-label">Positive</span>
+              <span class="breakdown-pct" id="pct-positive">0%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill positive-fill" id="bar-positive" style="width:0%"></div>
+            </div>
+            <span class="breakdown-count" id="count-positive">0</span>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-header">
+              <span class="dot negative-dot"></span>
+              <span class="breakdown-label">Negative</span>
+              <span class="breakdown-pct" id="pct-negative">0%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill negative-fill" id="bar-negative" style="width:0%"></div>
+            </div>
+            <span class="breakdown-count" id="count-negative">0</span>
+          </div>
+          <div class="breakdown-item">
+            <div class="breakdown-header">
+              <span class="dot neutral-dot"></span>
+              <span class="breakdown-label">Neutral</span>
+              <span class="breakdown-pct" id="pct-neutral">0%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill neutral-fill" id="bar-neutral" style="width:0%"></div>
+            </div>
+            <span class="breakdown-count" id="count-neutral">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pie Chart -->
+      <div class="section-card">
+        <h2 class="section-title">Distribution</h2>
+        <div class="chart-wrapper pie-wrapper">
+          <canvas id="pieChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Monthly Bar Chart -->
+      <div class="section-card">
+        <h2 class="section-title">Month-wise Comments</h2>
+        <div class="chart-wrapper">
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Trend Line Chart -->
+      <div class="section-card">
+        <h2 class="section-title">Sentiment Trend Over Time</h2>
+        <div class="chart-wrapper">
+          <canvas id="lineChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Top Positive Comments -->
+      <div class="section-card" id="positive-section">
+        <h2 class="section-title positive-title">
+          <span class="dot positive-dot"></span> Top Positive Comments
+        </h2>
+        <div id="positive-comments" class="comments-list"></div>
+      </div>
+
+      <!-- Top Negative Comments -->
+      <div class="section-card" id="negative-section">
+        <h2 class="section-title negative-title">
+          <span class="dot negative-dot"></span> Top Negative Comments
+        </h2>
+        <div id="negative-comments" class="comments-list"></div>
+      </div>
+
+    </div>
+
+    <!-- Analyze Button -->
+    <div class="btn-wrapper">
+      <button id="analyze-btn" class="primary-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        Analyze Current Video
+      </button>
+    </div>
+
+  </div>
+
+  <script src="chart.umd.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

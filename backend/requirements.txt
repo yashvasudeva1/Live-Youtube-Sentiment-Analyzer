@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+mlflow
+google-api-python-client
+pandas
+scikit-learn
+pydantic
+python-dotenv
+joblib
+lightgbm
+scipy

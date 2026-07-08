@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "YT Comment Analyzer",
+  "version": "1.0",
+  "description": "Analyze YouTube video comments for sentiment.",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "host_permissions": [
+    "https://www.youtube.com/*",
+    "http://localhost:8000/*"
+  ]
+}
